@@ -16,20 +16,26 @@
 #  along with this program; see the file COPYING3.  If not, see
 #  <http://www.gnu.org/licenses/>.
 
-all:: testbed
+all:: first
 
-programs = testbed
+first: force
+	gprbuild -p -P first.gpr
 
-testbed: force
-	gprbuild -p -P testbed.gpr
+debounce: debounce_software debounce_hardware
+
+debounce_software: force
+	gprbuild -p -P debounce.gpr -XIMPL=software
+
+debounce_hardware: force
+	gprbuild -p -P debounce.gpr -XIMPL=hardware
 
 %.bin: %
 	arm-eabi-objcopy -O binary $< $@
 
 clean:
-	for p in $(programs); do		\
-	  (gprclean -P $$p || true); \
-	done
+	-gprclean -P first
+	-gprclean -P debounce -XIMPL=software
+	-gprclean -P debounce -XIMPL=hardware
 	rm -f *.bin
 
 .PHONY: all build clean force
